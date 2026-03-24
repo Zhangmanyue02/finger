@@ -16,6 +16,7 @@ import {
 } from '@/shared/duplex/ipc-keys'
 import { IIpcMsgBody, IIpcMsgHeader, IIpcMsgParam } from '@/shared/duplex/typing'
 import { MAIN_PROCESS_NAME } from '@/shared/duplex/window-keys'
+import { logger } from '../utils'
 
 /** 进程模块合集 - 支持 BrowserWindow 或 WebContents */
 const processes: {
@@ -39,6 +40,14 @@ class DuplexSdk {
           processes[fromId] = e.sender
         }
 
+        // 记录 IPC 通信
+        logger.ipc('RECV', model, {
+          from: fromId?.slice(0, 20),
+          event: header.eventName,
+          requestId: header.requestId?.slice(0, 8),
+          data: params.body
+        })
+
         switch (model) {
           // 请求、响应
           case REQUEST:
@@ -59,7 +68,7 @@ class DuplexSdk {
           default:
         }
       } catch (error) {
-        console.log(error)
+        logger.error('IPC', '消息处理失败', error)
       }
     })
 
@@ -70,6 +79,7 @@ class DuplexSdk {
       if (!processes[windowId]) {
         processes[windowId] = e.sender
       }
+      logger.info('IPC', '渲染进程注册', { windowId })
       return windowId
     })
   }
@@ -78,6 +88,14 @@ class DuplexSdk {
   _sendToRenderer(toId: string, params: IIpcMsgParam) {
     const target = processes[toId]
     if (!target) return false
+
+    // 记录发送
+    logger.ipc('SEND', params.header.model || 'REPONSE', {
+      to: toId?.slice(0, 20),
+      event: params.header.eventName,
+      requestId: params.header.requestId?.slice(0, 8),
+      data: params.body
+    })
 
     if (target instanceof BrowserWindow) {
       if (!target.isDestroyed()) {
@@ -130,7 +148,7 @@ class DuplexSdk {
         })
       }
     } catch (error) {
-      console.log(error)
+      logger.error('IPC', '发送失败', error)
     }
   }
 
@@ -160,7 +178,7 @@ class DuplexSdk {
         delete subscribeTasks[toId][fromId][eventName][requestId]
       }
     } catch (error) {
-      console.log(error)
+      logger.error('IPC', '退订失败', error)
     }
   }
 

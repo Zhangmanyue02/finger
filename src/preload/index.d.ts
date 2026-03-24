@@ -14,14 +14,15 @@ interface UpdateCtrlApi {
   quitAndInstallApp: () => Promise<void>
 }
 
-interface Api {
+interface CoreApi {
   windowCtrl: WindowCtrlApi
   updateCtrl: UpdateCtrlApi
+  subscribe: (eventName: string, callback: (data: any) => void) => () => void
 }
 
 declare global {
   interface Window {
     electron: ElectronAPI
-    api: Api
+    coreApi: CoreApi
   }
 }

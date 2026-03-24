@@ -8,6 +8,8 @@ import { join } from 'path'
 import { ViewManager } from './ViewManager'
 import type { MainWindow } from '../window/MainWindow'
 import { is } from '@electron-toolkit/utils'
+import ipc from '../duplext'
+import { SUBSCRIPTION_KEYS } from '@/shared/duplex/event-keys'
 
 export interface LayoutConfig {
   tabbarHeight: number
@@ -16,7 +18,7 @@ export interface LayoutConfig {
 
 export class AppViewManager extends ViewManager {
   private layoutConfig: LayoutConfig = {
-    tabbarHeight: 40,
+    tabbarHeight: 80,
     sidebarWidth: 200
   }
 
@@ -109,6 +111,12 @@ export class AppViewManager extends ViewManager {
   updateLayout(): void {
     const [windowWidth, windowHeight] = this.mainWindow?.getSize() ?? [1200, 700]
     const { tabbarHeight, sidebarWidth } = this.layoutConfig
+
+    // 发布窗口大小变化事件
+    ipc.publisher(SUBSCRIPTION_KEYS.WINDOW_RESIZE_LISTENER, {
+      width: windowWidth,
+      height: windowHeight
+    })
 
     // 标题栏：顶部全宽
     this.setViewBounds('tabbar', {

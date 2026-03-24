@@ -9,7 +9,7 @@ import type { ViewManager } from '../views/ViewManager'
 export interface MainWindowOptions {
   width?: number
   height?: number
-  
+
   frame?: boolean
 }
 

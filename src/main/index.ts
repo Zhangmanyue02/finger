@@ -4,6 +4,7 @@
  */
 
 import { app } from 'electron'
+import { logger } from './utils'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { MainWindow } from './window/MainWindow'
@@ -38,9 +39,9 @@ function initializeApp(): void {
     const [windowWidth, windowHeight] = mainWindow.getSize()
     return {
       x: 0,
-      y: 40, // 标题栏高度
+      y: 80, // 导航栏高度
       width: windowWidth,
-      height: windowHeight - 40
+      height: windowHeight - 80
     }
   })
 

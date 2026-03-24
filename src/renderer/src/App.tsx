@@ -1,5 +1,5 @@
 import Router from './router'
-import NavBar from './window/nav-bar/src/page'
+import NavBar from './window/nav-bar'
 
 function App(): React.JSX.Element {
   // 根据 URL 参数决定渲染哪个视图

@@ -138,17 +138,18 @@ function createServiceProxy(serviceName: string, fnNames: string[]) {
   return service
 }
 
-// 构建 API 对象
-const api = {
+// 构建 coreApi 对象
+const coreApi = {
   windowCtrl: createServiceProxy(windowCtrlPreload.name, windowCtrlPreload.fns),
-  updateCtrl: createServiceProxy(updateCtrlPreload.name, updateCtrlPreload.fns)
+  updateCtrl: createServiceProxy(updateCtrlPreload.name, updateCtrlPreload.fns),
+  subscribe: rendererIpc.subscribe.bind(rendererIpc)
 }
 
 // 暴露到 window
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('coreApi', coreApi)
   } catch (error) {
     console.error(error)
   }
@@ -156,5 +157,5 @@ if (process.contextIsolated) {
   // @ts-ignore
   window.electron = electronAPI
   // @ts-ignore
-  window.api = api
+  window.coreApi = coreApi
 }
