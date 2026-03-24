@@ -1,0 +1,21 @@
+export const IPC_NAME = 'ELECTRON:IPC_NAME';
+export const REQUEST_REPONSE = 'ELECTRON:RESQUEST/RESPONSE';
+export const REQUEST = 'ELECTRON:RESQUEST';
+export const REPONSE = 'ELECTRON:RESPONSE';
+export const PUBLISHER = 'ELECTRON:PUBLISHER';
+export const SUBSCRIBER = 'ELECTRON:SUBSCRIBER';
+export const UNSUBSCRIBER = 'ELECTRON:UNSUBSCRIBER';
+export const PUBLISHER_SUBSCRIBER = 'ELECTRON:PUBLISHER/SUBSCRIBER';
+export const WINDOW_ID_REQ = 'ELECTRON:WINDOW_ID_REQ';
+// export const SERVICE_READY = 'ELECTRON:SERVICE_READY';
+export const RESPONSE_OK = 0; // 请求成功
+export const SERVICE_NOT_FOUND = 1; // 请求找不到服务
+export const RESPONSE_NOT_FOUND = 2; // 响应不到对应的请求
+export const RESPONSE_OVERTIME = 3; // 响应超时
+
+/** 请求响应超时，默认值 */
+export const DEFAULT_REQUEST_TIMEOUT = 20000;
+
+
+// 通讯的页面的键
+export const WINDOW_ID_KEY = 'ELECTRON:WINDOW_PROCESS_ID';
