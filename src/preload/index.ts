@@ -12,7 +12,6 @@ import {
 } from '@/shared/duplex/ipc-keys'
 import { MAIN_PROCESS_NAME } from '@/shared/duplex/window-keys'
 import windowCtrlPreload from '../main/ipc/window/preload'
-import updateCtrlPreload from '../main/ipc/updater/preload'
 
 // 请求回调缓存
 const requestCallbacks: Record<string, { resolve: Function; reject: Function; timeout: NodeJS.Timeout }> = {}
@@ -141,7 +140,6 @@ function createServiceProxy(serviceName: string, fnNames: string[]) {
 // 构建 coreApi 对象
 const coreApi = {
   windowCtrl: createServiceProxy(windowCtrlPreload.name, windowCtrlPreload.fns),
-  updateCtrl: createServiceProxy(updateCtrlPreload.name, updateCtrlPreload.fns),
   subscribe: rendererIpc.subscribe.bind(rendererIpc)
 }
 

@@ -1,96 +1,111 @@
-/**
- * 主进程入口
- * 职责：初始化应用、协调各模块
- */
-
-import { app } from 'electron'
-import { logger } from './utils'
+import { app, BaseWindow, WebContentsView, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { MainWindow } from './window/MainWindow'
-import { AppViewManager } from './views/AppViewManager'
-import { TabManager } from './tabs/TabManager'
 import { registerIpcServices } from './ipc'
-import './duplext' // 初始化双工通信
+import { logger } from './utils'
 
-// 模块实例
-let mainWindow: MainWindow  
-let viewManager: AppViewManager
-let tabManager: TabManager
-
-/**
- * 初始化应用
- */
-function initializeApp(): void {
-  // 创建主窗口
-  mainWindow = new MainWindow({
+function createWindow(): void {
+  // 创建 BaseWindow
+  const mainWindow = new BaseWindow({
     width: 1200,
-    height: 700,
-    frame: false
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    frame: false // 无边框窗口
   })
-  mainWindow.create()
 
-  // 创建视图管理器
-  const preloadPath = join(__dirname, '../preload/index.js')
-  viewManager = new AppViewManager(preloadPath)
-
-  // 创建标签页管理器
-  tabManager = new TabManager(preloadPath, () => {
-    const [windowWidth, windowHeight] = mainWindow.getSize()
-    return {
-      x: 0,
-      y: 80, // 导航栏高度
-      width: windowWidth,
-      height: windowHeight - 80
+  // 创建导航栏 WebContentsView
+  const navBarView = new WebContentsView({
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      nodeIntegration: false,
+      contextIsolation: true
     }
   })
+  mainWindow.contentView.addChildView(navBarView)
 
-  // 初始化视图
-  viewManager.initialize(mainWindow)
+  // 创建主内容 WebContentsView
+  const contentView = new WebContentsView({
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  })
+  mainWindow.contentView.addChildView(contentView)
+
+  // 布局：导航栏高度 40px
+  const NAVBAR_HEIGHT = 40
+
+  // 设置视图位置和大小
+  const updateLayout = (): void => {
+    const [width, height] = mainWindow.getSize()
+    navBarView.setBounds({ x: 0, y: 0, width, height: NAVBAR_HEIGHT })
+    contentView.setBounds({ x: 0, y: NAVBAR_HEIGHT, width, height: height - NAVBAR_HEIGHT })
+  }
+
+  updateLayout()
+
+  // 窗口大小改变时更新布局
+  mainWindow.on('resize', updateLayout)
 
   // 开发模式下打开 DevTools
   if (is.dev) {
-    viewManager.openNavBarDevTools()
-    viewManager.openDevTools()
+    navBarView.webContents.openDevTools({ mode: 'detach' })
+    contentView.webContents.openDevTools({ mode: 'detach' })
   }
 
-  // 创建初始标签页
-  tabManager.createTab({ url: '/', active: true })
+  // 处理外部链接
+  const handleExternalLinks = (webContents: Electron.WebContents): void => {
+    webContents.setWindowOpenHandler((details) => {
+      shell.openExternal(details.url)
+      return { action: 'deny' }
+    })
+  }
+
+  handleExternalLinks(navBarView.webContents)
+  handleExternalLinks(contentView.webContents)
+
+  // 加载页面
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    navBarView.webContents.loadURL(process.env['ELECTRON_RENDERER_URL'] + '#/navbar')
+    contentView.webContents.loadURL("https://www.baidu.com/")
+  } else {
+    navBarView.webContents.loadFile(join(__dirname, '../renderer/index.html'), { hash: '/navbar' })
+    contentView.webContents.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+
+  logger.info('Main', '窗口创建成功')
 }
 
-// 应用就绪
+// 应用准备就绪
 app.whenReady().then(() => {
   // 设置应用用户模型 ID
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.finger')
 
-  // 注册 IPC 服务
-  registerIpcServices()
-
-  // 监听窗口创建，设置快捷键优化
+  // 默认在 macOS 上打开/关闭窗口时重新创建
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // 初始化应用
-  initializeApp()
+  // 注册 IPC 服务
+  registerIpcServices()
 
-  // macOS 激活处理
+  createWindow()
+
+  // macOS 激活应用时创建窗口
   app.on('activate', () => {
-    if (mainWindow.getWindow() === null) {
-      initializeApp()
+    if (BaseWindow.getAllWindows().length === 0) {
+      createWindow()
     }
   })
 })
 
-// 所有窗口关闭时退出（macOS 除外）
+// 所有窗口关闭时退出应用（除了 macOS）
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
-
-// 应用退出时清理
-app.on('before-quit', () => {
-  tabManager?.destroyAll()
-  viewManager?.destroyAll()
 })

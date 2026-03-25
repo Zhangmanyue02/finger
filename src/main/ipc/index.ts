@@ -5,11 +5,10 @@
 
 import ipc from '../duplext'
 import windowCtrlFn from './window'
-import updateCtrlFn from './updater'
 import type { IIpcService } from './typing.d'
 
 // 所有 IPC 服务
-const services: IIpcService<any>[] = [windowCtrlFn, updateCtrlFn]
+const services: IIpcService<any>[] = [windowCtrlFn]
 
 /**
  * 注册所有 IPC 服务
@@ -35,4 +34,4 @@ export function registerIpcServices(): void {
   })
 }
 
-export { windowCtrlFn, updateCtrlFn }
+export { windowCtrlFn }

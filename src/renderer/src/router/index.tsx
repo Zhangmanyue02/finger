@@ -1,6 +1,6 @@
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import Home from '@renderer/pages/Home'
-import Settings from '@renderer/pages/Settings'
+import NavBar from '@renderer/window/nav-bar'
 
 const router = createHashRouter([
   {
@@ -8,8 +8,8 @@ const router = createHashRouter([
     element: <Home />
   },
   {
-    path: '/settings',
-    element: <Settings />
+    path: '/navbar',
+    element: <NavBar />
   }
 ])
 
@@ -18,3 +18,4 @@ function Router(): React.JSX.Element {
 }
 
 export default Router
+  

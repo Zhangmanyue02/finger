@@ -14,10 +14,28 @@ interface UpdateCtrlApi {
   quitAndInstallApp: () => Promise<void>
 }
 
+interface TabCtrlApi {
+  createTab: (options?: {
+    url?: string
+    title?: string
+    active?: boolean
+  }) => Promise<Tab.TabItem | null>
+  closeTab: (id: number) => Promise<boolean>
+  activateTab: (id: number) => Promise<boolean>
+  getTab: (id: number) => Promise<Tab.TabItem | null>
+  getActiveTab: () => Promise<Tab.TabItem | null>
+  getAllTabs: () => Promise<Tab.TabItem[]>
+  navigateTab: (id: number, url: string) => Promise<void>
+  refreshTab: (id: number) => Promise<void>
+  goBack: (id: number) => Promise<void>
+  goForward: (id: number) => Promise<void>
+  getTabCount: () => Promise<number>
+}
+
 interface CoreApi {
   windowCtrl: WindowCtrlApi
   updateCtrl: UpdateCtrlApi
-  subscribe: (eventName: string, callback: (data: any) => void) => () => void
+  tabCtrl: TabCtrlApi
 }
 
 declare global {

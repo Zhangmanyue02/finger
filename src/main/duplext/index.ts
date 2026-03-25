@@ -11,7 +11,6 @@ import {
   SERVICE_NOT_FOUND,
   SUBSCRIBER,
   UNSUBSCRIBER,
-  WINDOW_ID_KEY,
   WINDOW_ID_REQ
 } from '@/shared/duplex/ipc-keys'
 import { IIpcMsgBody, IIpcMsgHeader, IIpcMsgParam } from '@/shared/duplex/typing'
