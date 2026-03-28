@@ -15,21 +15,11 @@ interface UpdateCtrlApi {
 }
 
 interface TabCtrlApi {
-  createTab: (options?: {
-    url?: string
-    title?: string
-    active?: boolean
-  }) => Promise<Tab.TabItem | null>
-  closeTab: (id: number) => Promise<boolean>
-  activateTab: (id: number) => Promise<boolean>
-  getTab: (id: number) => Promise<Tab.TabItem | null>
-  getActiveTab: () => Promise<Tab.TabItem | null>
-  getAllTabs: () => Promise<Tab.TabItem[]>
-  navigateTab: (id: number, url: string) => Promise<void>
-  refreshTab: (id: number) => Promise<void>
-  goBack: (id: number) => Promise<void>
-  goForward: (id: number) => Promise<void>
-  getTabCount: () => Promise<number>
+  createTab: (url?: string) => Promise<{ id: string }>
+  closeTab: (id: string) => Promise<boolean>
+  switchTab: (id: string) => Promise<boolean>
+  getAllTabs: () => Promise<Omit<Tab.TabItem, 'active' | 'loading' | 'favicon'>[]>
+  getCurrentTabId: () => Promise<string | null>
 }
 
 interface CoreApi {
